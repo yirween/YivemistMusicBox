@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>music box - yirween's web</title>
+    <link rel="stylesheet" href="./css.css">
+</head>
+<body>
+    <div class="top">
+        <div class="serchbox"></div>
+    </div>
+    <div class="cpts" id="cpts">
+        <!-- 歌单会在这里加载 -->
+         
+    </div>
+    
+    <div class="incpt" id="incpt">
+        <div class="left-items">
+            <!-- 返回箭头 -->
+            <svg class="back" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M10 22L0 12L10 2l1.775 1.775L3.55 12l8.225 8.225z"/></svg>        </div>
+        <div class="right-items">
+            <div id="songs-list">
+                <!-- 曲目会在这里加载 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="line"></div>
+    <div class="music-console">
+        <div class="music-cover"></div>
+        <div class="music-progress-and-control">
+            <div class="music-control">
+                <!-- 歌曲切换及暂停 -->
+                <div class="previous-music"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><path fill="currentColor" d="M6 4h2v2h2v2h2v2h2v4h-2v2h-2v2H8v2H6zm12 0h-2v16h2z"/></svg></div>
+                <div class="pause-music"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><path fill="currentColor" d="M6 19h4V5H6zm8-14v14h4V5z"/></svg></div>
+                <div class="next-music"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><path fill="currentColor" d="M6 4h2v2h2v2h2v2h2v4h-2v2h-2v2H8v2H6zm12 0h-2v16h2z"/></svg></div>
+            </div>
+            <!-- 进度条 -->
+             <div class="music-progress"><div class="play-past"></div></div>
+        </div>
+        <!-- 播放列表按钮 -->
+         <div class="music-list-botton"><svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><path fill="currentColor" d="M2 18h10v2H2zm0-7h14v2H2zm0-7h20v2H2zm17 11.17V9h5v2h-3v7a3 3 0 1 1-2-2.83M18 19a1 1 0 1 0 0-2a1 1 0 0 0 0 2"/></svg></div>
+
+    </div>
+    <!-- 播放列表菜单 -->
+     <div class="balck-mask"><!-- 黑色遮罩，在显示播放列表时显示 --></div>
+    <div class="music-play-list-menu"></div>
+
+    <script src="./js.js"></script>
+</body>
+</html>

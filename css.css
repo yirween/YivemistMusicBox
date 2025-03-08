@@ -1,0 +1,340 @@
+html,body {
+    width: 100%;
+    height: 100%;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    
+}
+
+.top {
+    height: 20%;
+    width: 100%;
+}
+
+.top .serchBox {
+    bottom: 0;
+    left: 24px;
+}
+
+
+.cpts {/*框柱所有歌单*/
+    width: 100vw;
+    margin: 8px 0 0 0;
+    padding: 0 10%;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    display: flex;
+}
+.cpts-hidden1 {/*隐藏选取歌单页面*/
+    position: absolute;
+    transition: all 0.1s;
+    transform: translateY(10%) rotatey(30deg);
+    opacity: 0;
+}.cpts-hidden2 {display: none;}
+
+.cpt {/*歌单div*/
+    height: 200px;
+    width: 200px;
+    margin: 8px;
+    overflow: hidden;
+}
+.cpt .cpt-img {/*歌单封面图*/
+    height: 200px;
+    width: auto;
+    z-index: 0;
+    transition: transform 0.5s,fliter 0.5s ease;
+}
+
+.cpt .text-bar {/*歌单底下的黑条*/
+    width: 100%;
+    height: 100%;
+    position: relative;
+    top: -30%;
+    background-color: #00000050;
+    transition: top 0.5s
+}
+
+.cpt:hover .text-bar {/*鼠标移动到歌单封面的黑条动画*/
+    top: -101%;
+}
+
+.cpt:hover .cpt-img {/*鼠标移到歌单封面图的动画*/
+    transform: scale(1.05);
+    filter: blur(2px);
+}
+
+.cpt .cpt-title {/*歌单标题*/
+    margin-left: 8%;
+    transform: translateY(18%);
+    font: 1.5em sans-serif;
+    color: #eee;
+    z-index: 2;
+}
+
+.cpt .cpt-detial {/*歌单简介*/
+    margin: 11% 9% auto;
+    color: #00000080;
+    z-index: 2;
+}
+
+
+
+
+/* 歌单详情页 */
+.incpt {/*整个歌单详情页*/
+    display: none;
+}
+.incpt-visiable {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    
+}
+
+.left-items {/*歌单左侧信息*/
+    width: 20%;
+}
+
+.back {/*返回选歌单界面*/
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    cursor: pointer;
+    transition: color 0.3s;
+    z-index: 999;
+    color: #555;
+}
+.back:hover {
+    color: #222;
+}
+
+.right-items {/*歌单右侧主体*/
+    width: 80%;
+    padding-top: 2em;
+}
+
+.song {/*歌曲选项*/
+    width: 90%;
+    height: 2em;
+    margin-left: 8px;
+    padding-left: 8px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    transition: all 0.5s;
+    opacity: 0;
+    transform: translateY(20px); /* 修正为 translateY(20px) */
+    transition: transform 0.5s, background-color 0.5s; /* 明确过渡属性 */
+}
+
+.song:hover {/*鼠标移动到歌曲动画*/
+    background-color: #00000020;
+    transform: translate(8px, 20px);
+    margin-left: 8px;
+}
+
+.song:hover .song-title,.song-author {/*鼠标移动到歌曲显示全部信息*/
+    overflow: visible;
+    text-overflow: none;
+    -o-text-overflow:none;
+}
+.song:hover .song-author{
+    overflow: visible;
+    text-overflow: none;
+    -o-text-overflow:none;
+}
+
+.song-title {/*曲名*/
+    width: 40%;
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -o-text-overflow:ellipsis;
+}
+
+.song-author {/*曲作者*/
+    width: 30%;
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -o-text-overflow:ellipsis;
+}
+
+.song-tag {/*包含所有曲标签*/
+    width: 30%;
+    display: flex;
+}
+.tag {/*曲标签*/
+    margin: 0 4px;
+    padding: 4px;
+    border-radius: 8px;
+    background-color: #00000010;
+}
+
+
+
+
+/* 歌曲播放 */
+.music-console {/*播放控制台*/
+    width: 100%;
+    height: 110px;
+    margin: 0;
+    background-color: #eee;
+    border-top: #555 1px ;
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    overflow: hidden;
+    justify-content: center;
+    z-index: 15;
+}
+
+.line {/*歌曲控制台顶部的分割线*/
+    width: 80%;
+    height: 1px;
+    position: fixed;
+    bottom: 110px;
+    left: 10%;
+    background-color: #ddd;
+    z-index: 12;
+}
+
+.music-cover {/*歌曲封面*/
+    width: 100px;
+    height: 100px;
+    margin: 5px 20px 5px 5px;
+    background-size: cover; 
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #fff;
+}
+
+.music-progress-and-control {
+    height: 100%;
+    margin: 0 0 0 32px;
+}
+
+.music-control {/*歌曲切换暂停控制台*/
+    margin: 32px 32px 16px 32px;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.previous-music {/*上一首*/
+    transform: rotateY(180deg);
+}
+
+.music-progress {/*进度条*/
+    width: 300px;
+    height: 3px;
+    background-color: #ddd;
+    position: relative;
+    cursor: pointer;
+}
+
+.play-past {/*已播放进度*/
+    width: 0;
+    height: 3px;
+    background-color: #555;
+}
+
+.music-progress:hover .play-past::after {
+    content: "";
+    position: absolute;
+    right: -5px;
+    top: -3px;
+    width: 10px;
+    height: 10px;
+    background: #555;
+    border-radius: 50%;
+}
+
+.music-list-botton {/*显示播放列表的按钮*/
+    margin: 35px 0 0 35px;
+}
+
+.balck-mask {/*显示播放列表时的黑色遮罩*/
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #000000aa;
+    z-index: 9;
+    display: none;
+}
+
+.music-play-list-menu {/*播放列表*/
+    height: 50%;
+    width: 100%;
+    padding: 8px;
+    transition: bottom 0.3s ease-out;
+    overflow-y: auto;
+    position: fixed;
+    bottom: -50%;
+    background-color: #eee;
+    z-index: 11;
+}
+
+.playlist-item {
+    display: flex;
+    padding: 12px 20px;
+    border-bottom: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    margin: 8px;
+    transition: all 0.3s;
+    border-radius: 8px;
+}
+
+.playlist-item.dragging {
+    opacity: 1;
+    background: #f8f8f8;
+}
+
+.song-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+}
+
+.playlist-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.delete-btn {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.3s;
+}
+
+.delete-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.drag-handle {
+    opacity: 0.4;
+    cursor: grab;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.playlist-item:hover {
+    background: #f5f5f5;
+}
+
+.playlist-item:active {
+    background: #eee;
+}
