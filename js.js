@@ -178,91 +178,51 @@ var cptData = {
     ]
 }
 
+// 音乐播放器核心模块
+const MusicPlayer = (() => {
+    const audio = new Audio();
+    let currentIndex = 0;
+    let playList = [];
+    let isPlaying = false;
 
-// 播放列表
-var playList = [];
+    // 初始化事件
+    const initEvents = () => {
+        document.querySelector('.pause-music').addEventListener('click', togglePlay);
+        document.querySelector('.previous-music').addEventListener('click', playPrev);
+        document.querySelector('.next-music').addEventListener('click', playNext);
+        audio.addEventListener('timeupdate', updateProgress);
+        document.querySelector('.music-progress').addEventListener('click', seek);
+    };
 
-var cptOpen = false;    // 标记歌单打开or关闭状态
-
-const pauseBtn = document.querySelector('.pause-music');
-
-// 播放器全局状态
-const musicPlayer = {
-    audio: new Audio(),          // 播放器实例
-    currentIndex: 0,             // 当前播放索引
-    playList: [],                // 当前播放列表
-    isPlaying: false,            // 播放状态
-    
-    // 初始化播放器事件
-    init: function() {
-        // 绑定播放结束事件
-        this.audio.addEventListener('ended', () => this.playNext());
-        // 绑定播放器控制按钮
-        document.querySelector('.pause-music').addEventListener('click', () => this.togglePlay());
-        document.querySelector('.previous-music').addEventListener('click', () => this.playPrev());
-        document.querySelector('.next-music').addEventListener('click', () => this.playNext());
+    // 加载歌曲（整合版）
+    const loadSong = (song) => {
+        if (!song?.url) return;
         
-        // 添加时间更新监听
-        this.audio.addEventListener('timeupdate', () => this.updateProgress());
-        
-        // 绑定进度条点击事件
-        document.querySelector('.music-progress').addEventListener('click', (e) => this.seek(e));
-    },
-
-    // 新增进度更新方法
-    updateProgress: function() {
-        const progress = (this.audio.currentTime / this.audio.duration) * 100;
-        document.querySelector('.play-past').style.width = `${progress}%`;
-    },
-
-    // 新增进度跳转方法
-    seek: function(e) {
-        if (!this.audio.src) return; // 没有加载歌曲时禁止操作
-        
-        const progressBar = e.currentTarget;
-        const rect = progressBar.getBoundingClientRect();
-        const clickPosition = e.clientX - rect.left;
-        const percentage = clickPosition / rect.width;
-        
-        // 边界限制
-        const validPercentage = Math.max(0, Math.min(1, percentage));
-        this.audio.currentTime = this.audio.duration * validPercentage;
-        
-        // 立即更新进度条显示
-        this.updateProgress();
-
-
-    },
-    
-    // 修改loadSong方法添加重置进度
-    loadSong: function(song) {
-        this.audio.src = song.url;
-        this.audio.play().then(() => {
-            this.isPlaying = true;
+        audio.src = song.url;
+        audio.play().then(() => {
+            isPlaying = true;
             document.querySelector('.music-cover').style.backgroundImage = `url(${song.cover})`;
-            // 重置进度条
             document.querySelector('.play-past').style.width = "0%";
-        }).catch(error => {
-            console.error('播放错误:', error);
-        });
-    },
+            updatePlayButton();
+        }).catch(console.error);
+    };
 
-    // 加载并播放指定歌曲
-    loadSong: function(song) {
-        this.audio.src = song.url;
-        this.audio.play();
-        this.isPlaying = true;
-        // 更新封面和界面
-        document.querySelector('.music-cover').style.backgroundImage = `url(${song.cover})`;
-    },
-    
-    // 切换播放/暂停
-    togglePlay: function() {
-        
-        if (this.isPlaying) {
-            this.audio.pause();
-            // 暂停状态动画图标
-            pauseBtn.innerHTML = `
+    // 播放控制
+    const togglePlay = () => {
+        isPlaying ? audio.pause() : audio.play();
+        isPlaying = !isPlaying;
+        updatePlayButton();
+    };
+
+    // 更新播放按钮
+    const updatePlayButton = () => {
+        const pauseBtn = document.querySelector('.pause-music');
+        pauseBtn.innerHTML = isPlaying ? 
+            `
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M6 19h4V5H6zm8-14v14h4V5z"/>
+                </svg>`:
+            `
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
                     <path fill="none" stroke="currentColor" 
                         stroke-dasharray="40" stroke-dashoffset="40" 
@@ -272,227 +232,80 @@ const musicPlayer = {
                         <animate fill="freeze" attributeName="stroke-dashoffset" 
                             dur="0.2s" values="40;0"/>
                     </path>
-                </svg>`;
-        } else {
-            this.audio.play();
-            // 播放状态图标
-            pauseBtn.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M6 19h4V5H6zm8-14v14h4V5z"/>
-                </svg>`;
-        }
-        
-        this.isPlaying = !this.isPlaying;
-    },
-    
-    playNext: function() {
-        if (this.playList.length === 0) return;
-        this.currentIndex = (this.currentIndex + 1) % this.playList.length;
-        const nextSong = this.playList[this.currentIndex];
-        if (nextSong) this.loadSong(nextSong);
-        pauseBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M6 19h4V5H6zm8-14v14h4V5z"/>
-            </svg>`;
-    },
-    
-    playPrev: function() {
-        if (this.playList.length === 0) return;
-        this.currentIndex = (this.currentIndex - 1 + this.playList.length) % this.playList.length;
-        const prevSong = this.playList[this.currentIndex];
-        if (prevSong) this.loadSong(prevSong);
-        pauseBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M6 19h4V5H6zm8-14v14h4V5z"/>
-            </svg>`;
-    },
-};
+                </svg>`  ;
+    };
 
-// 初始化播放器
-musicPlayer.init();
+    // 切歌逻辑
+    const playNext = () => updatePlayIndex(currentIndex + 1);
+    const playPrev = () => updatePlayIndex(currentIndex - 1);
 
+    // 更新播放索引
+    const updatePlayIndex = (newIndex) => {
+        if (!playList.length) return;
+        currentIndex = (newIndex + playList.length) % playList.length;
+        loadSong(playList[currentIndex]);
+    };
 
+    // 进度条控制
+    const updateProgress = () => {
+        const progress = (audio.currentTime / audio.duration) * 100 || 0;
+        document.querySelector('.play-past').style.width = `${progress}%`;
+    };
 
+    const seek = (e) => {
+        const rect = e.target.getBoundingClientRect();
+        const percentage = (e.clientX - rect.left) / rect.width;
+        audio.currentTime = audio.duration * Math.max(0, Math.min(1, percentage));
+    };
 
-// 创建歌单
-for (var cptlenth = 0; cptlenth < cptData.cpts.length; cptlenth++) {
-    var addingcpt = document.getElementById('cpts');
-    addingcpt.innerHTML += '<div class="cpt"><img class="cpt-img" src="' + cptData.cpts[cptlenth]["cptImg"] + '" alt=""><div class="text-bar"><div class="cpt-title">' + cptData.cpts[cptlenth]["cptTitle"] + '</div><div class="cpt-detial">' + cptData.cpts[cptlenth]["cptDetial"] + '</div></div></div>';
-}
+    return {
+        init: initEvents,
+        getPlaylist: () => playList,
+        setPlaylist: (list) => playList = list.filter(s => s?.url),
+        addToPlaylist: (song) => {
+            if (!playList.some(s => s.id === song.id)) {
+                playList.push(song);
+                return true;
+            }
+            return false;
+        },
+        loadSong,
+        togglePlay,
+        playNext,
+        playPrev
+    };
+})();
 
-// 歌单被点击时打开对应歌单
-document.addEventListener("click", (e) => {
-    const cptDiv = e.target.closest(".cpt");
-    if (!cptDiv) return;
+// 播放列表UI模块
+const PlaylistUI = (() => {
+    let draggedItem = null;
 
-    // 标记歌单为打开状态
-    cptOpen = true;
+    // 初始化
+    const init = () => {
+        document.querySelector('.music-list-botton').addEventListener('click', togglePlaylist);
+        document.querySelector('.balck-mask').addEventListener('click', hidePlaylist);
+        initDragEvents();
+    };
 
-    // 获取被点击的歌单索引
-    const cptindex = [...document.querySelectorAll(".cpt")].indexOf(cptDiv);
-
-    // 隐藏歌单选择界面
-    const hidcpts = document.getElementById("cpts");
-    hidcpts.classList.add("cpts-hidden1");
-    setTimeout(() => hidcpts.classList.add("cpts-hidden2"), 100);
-
-    // 显示歌单详情页
-    const visiincpt = document.getElementById("incpt");
-    visiincpt.classList.add("incpt-visiable");
-
-    // 清空现有歌曲列表
-    const songsList = document.getElementById("songs-list");
-    songsList.innerHTML = ""; // 清空容器
-
-    // 获取目标歌曲ID列表
-    let targetSongIDs = [];
-    if (cptindex === 0) {
-        // 合并所有歌单的歌曲ID（跳过第一个歌单自己）
-        targetSongIDs = songData.map(song => song.id);
-    } else {
-        // 正常获取当前歌单的歌曲ID
-        targetSongIDs = cptData.cpts[cptindex]?.cptList || [];
-    }
-
-    // 根据ID从songData中查找歌曲对象
-    const targetSongs = targetSongIDs.map(id => 
-        songData.find(song => song.id === id)
-    ).filter(Boolean); // 过滤无效项
-
-    // 向添加歌曲
-    targetSongs.forEach((song, index) => {
-        setTimeout(() => {
-            const songDiv = document.createElement("div");
-            songDiv.className = "song";
-
-            // 构建标签HTML（带容错）
-            const tagsHTML = song.tag?.map(t => 
-                `<div class="tag">${t}</div>`
-            ).join("") || ""; // 处理无tag情况
-
-            songDiv.innerHTML = `
-                <div class="song-title">${song.title || "无标题"}</div>
-                <div class="song-author">${song.author || "未知作者"}</div>
-                <div class="song-tag">${tagsHTML}</div>
-            `;
-
-
-
-            
-            // 添加点击播放事件
-            songDiv.addEventListener('click', () => {
-                musicPlayer.currentIndex = index;
-                musicPlayer.loadSong(song);
-            });
-
-            // 设置播放列表时添加有效性检查
-            musicPlayer.playList = targetSongs.filter(song => song?.url); // 过滤无效歌曲
-            
-            // 重置当前播放索引
-            musicPlayer.currentIndex = 0;
-
-            songsList.appendChild(songDiv);
-            
-            // 触发入场动画
-            setTimeout(() => {
-                songDiv.style.opacity = "1";
-                songDiv.style.transform = "translateY(0)";
-            }, 10);
-        }, 50 * index); // 间隔50ms添加
-    });
-});
-
-
-// 当返回箭头被点击关闭歌单详情
-document.addEventListener("click", (e) => {
-    const back = e.target.closest(".back");
-    if (!back) return;
-
-    // 标记歌单为关闭状态
-    cptOpen = false;
-
-    // 显示歌单选择页
-    const hidcpts = document.getElementById("cpts");
-    hidcpts.classList.remove("cpts-hidden1");
-    hidcpts.classList.remove("cpts-hidden2");
-
-    // 隐藏歌单详情页
-    const visiincpt = document.getElementById("incpt");
-    visiincpt.classList.remove("incpt-visiable");
-});
-
-// 音乐播放
-
-// 当歌曲卡片被点击
-document.addEventListener("click", (e) => {
-    const playMusic = e.target.closest(".song");
-    if (!playMusic) return;
-
-    // 获取被点击的音乐索引
-    const songindex = [...document.querySelectorAll(".song")].indexOf(playMusic);
-    console.log(songindex)
-
-    pauseBtn.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
-        <path fill="currentColor" d="M6 19h4V5H6zm8-14v14h4V5z"/>
-    </svg>`;
-
-});
-
-
-
-const playlistUI = {
-    // 初始化播放列表事件
-    init: function() {
-        // 绑定播放列表按钮点击
-        document.querySelector('.music-list-botton').addEventListener('click', () => this.togglePlaylist());
-        // 绑定遮罩点击事件
-        document.querySelector('.balck-mask').addEventListener('click', () => this.hidePlaylist());
-    },
-
-    // 切换播放列表显示
-    togglePlaylist: function() {
+    // 显示/隐藏逻辑
+    const togglePlaylist = () => {
         const menu = document.querySelector('.music-play-list-menu');
-        const mask = document.querySelector('.balck-mask');
-        
-        if (menu.style.bottom === '0px') {
-            this.hidePlaylist();
-        } else {
-            this.showPlaylist();
-        }
-    },
+        menu.style.bottom = menu.style.bottom === '0px' ? '-50%' : '110px';
+        document.querySelector('.balck-mask').style.display = 
+            menu.style.bottom === '110px' ? 'block' : 'none';
+        if (menu.style.bottom === '110px') updatePlaylist();
+    };
 
-    // 显示播放列表
-    showPlaylist: function() {
-        const menu = document.querySelector('.music-play-list-menu');
-        const mask = document.querySelector('.balck-mask');
-        
-        menu.style.bottom = '110px';
-        mask.style.display = 'block';
-        this.updatePlaylist();
-    },
+    const hidePlaylist = () => {
+        document.querySelector('.music-play-list-menu').style.bottom = '-50%';
+        document.querySelector('.balck-mask').style.display = 'none';
+    };
 
-    // 隐藏播放列表
-    hidePlaylist: function() {
-        const menu = document.querySelector('.music-play-list-menu');
-        const mask = document.querySelector('.balck-mask');
-        
-        menu.style.bottom = '-50%';
-        mask.style.display = 'none';
-    },
-
-    // 更新播放列表内容
-    updatePlaylist: function() {
+    // 更新播放列表
+    const updatePlaylist = () => {
         const container = document.querySelector('.music-play-list-menu');
-        container.innerHTML = '';
-
-        musicPlayer.playList.forEach((song, index) => {
-            const item = document.createElement('div');
-            item.className = 'playlist-item';
-            item.draggable = true;
-            item.dataset.index = index;
-            
-            item.innerHTML = `
+        container.innerHTML = MusicPlayer.getPlaylist().map((song, index) => `
+            <div class="playlist-item" data-index="${index}" draggable="true">
                 <div class="song-info">
                     <div class="song-title">${song.title || "无标题"}</div>
                     <div class="song-author">${song.author || "未知作者"}</div>
@@ -508,118 +321,156 @@ const playlistUI = {
                             <path fill="currentColor" d="M6 20V6H5V5h4v-.77h6V5h4v1h-1v14zm1-1h10V6H7zm2.808-2h1V8h-1zm3.384 0h1V8h-1zM7 6v13z"/>
                         </svg>
                     </div>
+
                 </div>
-            `;
+            </div>
+        `).join('');
 
-            // 添加整行点击事件
-            item.addEventListener('click', (e) => {
-                // 排除按钮区域的点击
-                if(!e.target.closest('.playlist-controls')) {
-                    musicPlayer.currentIndex = index;
-                    musicPlayer.loadSong(song);
-                    musicPlayer.audio.play();
-                    musicPlayer.isPlaying = true;
-                    // 更新播放按钮状态
-                    document.querySelector('.pause-music').innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M6 19h4V5H6zm8-14v14h4V5z"/>
-                        </svg>`;
-                }
-            });
-
-            // 绑定删除事件
-            item.querySelector('.delete-btn').addEventListener('click', (e) => {
+        // 绑定事件
+        container.querySelectorAll('.delete-btn').forEach((btn, index) => {
+            btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                this.removeFromPlaylist(index);
-            });
-
-            container.appendChild(item);
-        });
-
-        // 初始化拖拽排序
-        this.initSortable();
-    },
-
-    // 从播放列表删除歌曲
-    removeFromPlaylist: function(index) {
-        musicPlayer.playList.splice(index, 1);
-        if(musicPlayer.currentIndex >= index) musicPlayer.currentIndex--;
-        this.updatePlaylist();
-    },
-
-    // 初始化拖拽排序
-    initSortable: function() {
-        let draggedItem = null;
-
-        document.querySelectorAll('.playlist-item').forEach(item => {
-            item.addEventListener('dragstart', (e) => {
-                draggedItem = item;
-                setTimeout(() => item.classList.add('dragging'), 0);
-                e.dataTransfer.effectAllowed = 'move'; // 添加此行
-            });
-
-            item.addEventListener('dragend', () => {
-                draggedItem = null;
-                document.querySelectorAll('.playlist-item').forEach(i => {
-                    i.classList.remove('dragging');
-                });
+                const newList = MusicPlayer.getPlaylist().filter((_, i) => i !== index);
+                MusicPlayer.setPlaylist(newList);
+                updatePlaylist();
             });
         });
+    };
 
-        document.querySelector('.music-play-list-menu').addEventListener('dragover', e => {
+    // 拖拽事件
+    const initDragEvents = () => {
+        document.addEventListener('dragstart', e => {
+            if (!e.target.closest('.playlist-item')) return;
+            draggedItem = e.target.closest('.playlist-item');
+            setTimeout(() => draggedItem.classList.add('dragging'), 0);
+        });
+
+        document.addEventListener('dragend', () => {
+            draggedItem?.classList.remove('dragging');
+            draggedItem = null;
+        });
+
+        document.addEventListener('dragover', e => {
+            if (!draggedItem) return;
             e.preventDefault();
-            if (!draggedItem) return; // 添加空值检查
             
-            const afterElement = this.getDragAfterElement(e.clientY);
+            const afterElement = getDragAfterElement(e.clientY);
             const container = document.querySelector('.music-play-list-menu');
             
-            // 增强节点有效性验证
-            if (draggedItem && draggedItem.parentNode === container) {
-                if (afterElement && afterElement.parentNode === container) {
-                    container.insertBefore(draggedItem, afterElement);
-                } else {
-                    container.appendChild(draggedItem);
-                }
-
-                // 添加try-catch容错
-                try {
-                    const newIndex = [...container.children].indexOf(draggedItem);
-                    const [removed] = musicPlayer.playList.splice(draggedItem.dataset.index, 1);
-                    musicPlayer.playList.splice(newIndex, 0, removed);
-                    
-                    if(musicPlayer.currentIndex == draggedItem.dataset.index) {
-                        musicPlayer.currentIndex = newIndex;
-                    }
-                    // 更新所有项目的dataset.index
-                    [...container.children].forEach((item, index) => {
-                        item.dataset.index = index;
-                    });
-                } catch (error) {
-                    console.error('排序出错:', error);
-                }
+            if (afterElement) {
+                container.insertBefore(draggedItem, afterElement);
+            } else {
+                container.appendChild(draggedItem);
             }
+
+            // 更新播放列表顺序
+            const newIndex = [...container.children].indexOf(draggedItem);
+            const newList = [...MusicPlayer.getPlaylist()];
+            const [moved] = newList.splice(draggedItem.dataset.index, 1);
+            newList.splice(newIndex, 0, moved);
+            MusicPlayer.setPlaylist(newList);
         });
-    },
+    };
 
-    // 修改getDragAfterElement方法
-    getDragAfterElement: function(y) {
-        const elements = [...document.querySelectorAll('.playlist-item:not(.dragging)')];
-        let closestElement = null;
-        let closestOffset = Number.NEGATIVE_INFINITY;
+    const getDragAfterElement = (y) => {
+        return [...document.querySelectorAll('.playlist-item:not(.dragging)')]
+            .reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                return offset < 0 && offset > closest.offset ? 
+                    { offset, element: child } : closest;
+            }, { offset: -Infinity }).element;
+    };
 
-        elements.forEach(element => {
-            const box = element.getBoundingClientRect();
-            const offset = y - box.top - box.height / 2;
+    return { init, updatePlaylist, togglePlaylist, hidePlaylist };
+})();
+
+// 歌单管理模块
+const PlaylistManager = (() => {
+    const init = () => {
+        // 初始化歌单显示
+        document.getElementById('cpts').innerHTML = cptData.cpts.map(cpt => `
+            <div class="cpt">
+                <img class="cpt-img" src="${cpt.cptImg}">
+                <div class="text-bar">
+                    <div class="cpt-title">${cpt.cptTitle}</div>
+                    <div class="cpt-detial">${cpt.cptDetial}</div>
+                </div>
+            </div>
+        `).join('');
+
+        // 歌单点击事件
+        document.addEventListener('click', e => {
+            const cptDiv = e.target.closest('.cpt');
+            if (!cptDiv) return;
+
+            // 界面切换逻辑
+            document.getElementById('cpts').classList.add('cpts-hidden1');
+            setTimeout(() => document.getElementById('cpts').classList.add('cpts-hidden2'), 100);
+            document.getElementById('incpt').classList.add('incpt-visiable');
             
-            if (offset < 0 && offset > closestOffset) {
-                closestOffset = offset;
-                closestElement = element;
-            }
+            // 清空并加载歌曲列表
+            const songsList = document.getElementById('songs-list');
+            songsList.innerHTML = '';
+            getSongsByCpt(cptDiv).forEach((song, index) => {
+                setTimeout(() => createSongElement(song, index), 20 * index);
+            });
         });
 
-        return closestElement;
-    }
-};
+        // 返回按钮
+        document.querySelector('.back').addEventListener('click', () => {
+            document.getElementById('cpts').classList.remove('cpts-hidden1', 'cpts-hidden2');
+            document.getElementById('incpt').classList.remove('incpt-visiable');
+        });
+    };
 
-// 初始化播放列表UI
-playlistUI.init();
+    // 获取歌单对应歌曲
+    const getSongsByCpt = (cptDiv) => {
+        const index = [...document.querySelectorAll('.cpt')].indexOf(cptDiv);
+        return index === 0 ? 
+            songData : 
+            (cptData.cpts[index]?.cptList || [])
+                .map(id => songData.find(s => s.id === id))
+                .filter(Boolean);
+    };
+
+    // 创建歌曲元素
+    const createSongElement = (song, index) => {
+        const songDiv = document.createElement('div');
+        songDiv.className = 'song';
+        songDiv.dataset.song = JSON.stringify(song);
+        songDiv.innerHTML = `
+            <div class="song-title">${song.title}</div>
+            <div class="song-author">${song.author}</div>
+            <div class="song-tag">
+                ${(song.tag || []).map(t => `<div class="tag">${t}</div>`).join('')}
+            </div>
+        `;
+
+        // 点击事件
+        songDiv.addEventListener('click', () => {
+            if (MusicPlayer.addToPlaylist(song)) {
+                songDiv.classList.add('added');
+                setTimeout(() => songDiv.classList.remove('added'), 1000);
+            }
+            MusicPlayer.loadSong(song);
+        });
+
+        document.getElementById('songs-list').appendChild(songDiv);
+        setTimeout(() => songDiv.style.cssText = 'opacity:1; transform:translateY(0)', 10);
+    };
+
+    return { init };
+    
+})();
+
+// 初始化整个应用
+window.addEventListener('load', () => {
+    // 初始化播放列表为全部有效歌曲
+    MusicPlayer.setPlaylist(songData.filter(s => s.url));
+    
+    // 初始化各模块
+    MusicPlayer.init();
+    PlaylistUI.init();
+    PlaylistManager.init();
+});
