@@ -143,6 +143,38 @@ var songData = [
         "url":"http://music.163.com/song/media/outer/url?id=1935704598",
         "cover":"http://p1.music.126.net/-5mVUrSrFEr75VZF6aXskg==/109951167382644532.jpg?param=130y130",
     },
+    {
+        "id":"015",
+        "title":"花 feat.花谱",
+        "author":"Guiano/花譜",
+        "tag":["CAF"],
+        "url":"https://dlink.host/1drv/aHR0cHM6Ly8xZHJ2Lm1zL3UvYy8wMGI2MzExODBlMTM0MDkzL0VlcVo0eDgwYnZsTXV0VEFoNkR6NmMwQmJRVDlDZXNGTC13SFJXS3VKQ2hMZmc_ZT1nSGY2VzI.flac",
+        "cover":"http://p2.music.126.net/6CjCnkCYfXlDujCH2RFsBQ==/109951168622465171.jpg?param=130y130",
+    },
+    {
+        "id":"016",
+        "title":"雨色哀想",
+        "author":"空想推論_Mulin/诗岸",
+        "tag":["v","诗岸"],
+        "url":"https://dlink.host/1drv/aHR0cHM6Ly8xZHJ2Lm1zL3UvYy8wMGI2MzExODBlMTM0MDkzL0VjM19KNzhxUUhKT3UxWFVBaGVNM2NnQkZSUVdDUGdZVEZNMWlWVHBPd0RhQUE_ZT14SE1iZHA.mp3",
+        "cover":"",
+    },
+    {
+        "id":"017",
+        "title":"暮时追想",
+        "author":"空想推論_Mulin/诗岸",
+        "tag":["v","诗岸"],
+        "url":"https://dlink.host/1drv/aHR0cHM6Ly8xZHJ2Lm1zL3UvYy8wMGI2MzExODBlMTM0MDkzL0VjWWVZSnVrN0lST3RkUGxESmd6N3dRQmpQVkZXbS1ER2xuY2RFZ0VGMXEtMnc_ZT1YWkEwZ1Y.mp3",
+        "cover":"",
+    },
+    // {
+    //     "id":"018",
+    //     "title":"",
+    //     "author":"",
+    //     "tag":[],
+    //     "url":"",
+    //     "cover":"",
+    // },
 ]
 var cptData = {
     "cpts":[
@@ -161,19 +193,19 @@ var cptData = {
             "cptTitle":"单曲",
             "cptDetial":"没有分类的优质曲目",
             "cptImg":"http://p2.music.126.net/kqeb_edOZHYePUuxcPDbGw==/109951164200738323.jpg?param=130y130",
-            "cptList":["009","010","012","013","014"]
+            "cptList":["009","010","012","013","014","015"]
         },
         {
             "cptTitle":"warma",
             "cptDetial":"bilibili up主 warma",
-            "cptImg":"./cover1.jpg",
+            "cptImg":"https://dlink.host/1drv/aHR0cHM6Ly8xZHJ2Lm1zL2kvYy8wMGI2MzExODBlMTM0MDkzL0VmZTcwUE5VYjV0SHFWeG4waV9KYzdBQnBqWFhnWkVhTHFZSXB2aXBvLUtrb3c_ZT1OMWVoRWY.jpg",
             "cptList":["001","002","003","004","005"]
         },
         {
             "cptTitle":"虚拟歌姬",
             "cptDetial":"声音合成",
             "cptImg":"./SHIAN.jpg",
-            "cptList":["006","007","008","011"]
+            "cptList":["006","007","008","011","016","017"]
         },
     ]
 }
@@ -290,14 +322,14 @@ const PlaylistUI = (() => {
     // 显示/隐藏逻辑
     const togglePlaylist = () => {
         const menu = document.querySelector('.music-play-list-menu');
-        menu.style.bottom = menu.style.bottom === '0px' ? '-50%' : '110px';
+        menu.style.bottom = menu.style.bottom === '0px' ? '-60%' : '110px';
         document.querySelector('.balck-mask').style.display = 
             menu.style.bottom === '110px' ? 'block' : 'none';
         if (menu.style.bottom === '110px') updatePlaylist();
     };
 
     const hidePlaylist = () => {
-        document.querySelector('.music-play-list-menu').style.bottom = '-50%';
+        document.querySelector('.music-play-list-menu').style.bottom = '-60%';
         document.querySelector('.balck-mask').style.display = 'none';
     };
 
