@@ -147,7 +147,7 @@ var songData = [
         "id":"015",
         "title":"花 feat.花谱",
         "author":"Guiano/花譜",
-        "tag":["CAF"],
+        "tag":["CAF","无损音质"],
         "url":"https://dlink.host/1drv/aHR0cHM6Ly8xZHJ2Lm1zL3UvYy8wMGI2MzExODBlMTM0MDkzL0VlcVo0eDgwYnZsTXV0VEFoNkR6NmMwQmJRVDlDZXNGTC13SFJXS3VKQ2hMZmc_ZT1nSGY2VzI.flac",
         "cover":"http://p2.music.126.net/6CjCnkCYfXlDujCH2RFsBQ==/109951168622465171.jpg?param=130y130",
     },
@@ -505,4 +505,97 @@ window.addEventListener('load', () => {
     MusicPlayer.init();
     PlaylistUI.init();
     PlaylistManager.init();
+    UrlPlayer.init(); 
+    PlayHint.init(); 
 });
+
+
+
+// 在播放器模块添加URL参数处理功能
+const UrlPlayer = (() => {
+    // 解析URL参数
+    const getUrlParam = (name) => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+    };
+
+    // 根据ID查找歌曲
+    const findSongById = (id) => {
+        return songData.find(song => song.id === id);
+    };
+
+    // 初始化URL播放功能
+    const init = () => {
+        const songId = getUrlParam('id');
+        if (!songId) return;
+
+        const targetSong = findSongById(songId);
+        if (targetSong) {
+            // 直接播放
+            MusicPlayer.loadSong(targetSong);
+            // 高亮显示当前歌曲
+            highlightCurrentSong(targetSong.id);
+        }
+    };
+
+    // 高亮显示当前歌曲
+    const highlightCurrentSong = (songId) => {
+        document.querySelectorAll('.song').forEach(songDiv => {
+            const songData = JSON.parse(songDiv.dataset.song);
+            songDiv.classList.toggle('current-song', songData.id === songId);
+        });
+    };
+
+    return { init };
+})();
+
+
+// 在js.js中添加以下代码
+const PlayHint = (() => {
+    // 创建提示元素
+    const hintHTML = `
+        <div class="play-hint">
+            <div class="hint-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24">
+                    <path fill="#fff" d="M8 5v14l11-7z"/>
+                </svg>
+                <p>点击屏幕播放歌曲</p>
+            </div>
+        </div>
+    `;
+
+    // 初始化提示
+    const init = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasMusicId = urlParams.has('id');
+        
+        if (hasMusicId) {
+            // 添加提示到遮罩
+            const mask = document.querySelector('.balck-mask');
+            mask.insertAdjacentHTML('beforeend', hintHTML);
+            
+            // 显示遮罩并绑定事件
+            mask.style.display = 'flex';
+            mask.style.justifyContent = 'center';
+            mask.style.alignItems = 'center';
+            mask.style.cursor = 'pointer';
+            
+            // 单次点击处理
+            const handler = () => {
+                // 移除提示元素
+                const hintElement = document.querySelector('.play-hint');
+                if (hintElement) {
+                    hintElement.remove();
+                }
+                
+                // 播放音乐并隐藏遮罩
+                MusicPlayer.togglePlay();
+                mask.style.display = 'none';
+                mask.removeEventListener('click', handler);
+            };
+            mask.addEventListener('click', handler);
+        }
+    };
+
+    return { init };
+})();
